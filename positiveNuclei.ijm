@@ -28,45 +28,42 @@ function processFile(input, output, file) {
 	// Leave the print statements until things work, then remove them.
 open(input+file);
 title=getTitle();
-noext = split(title, ".");
-print(title);
 run("Split Channels");
-run("Set Measurements...", "mean shape redirect=C1-"+title+" decimal=3");
-selectImage("C3-"+title);
-run("Gaussian Blur...",2);
-run("Auto Threshold", "method=Huang white");
-run("Analyze Particles...", "size=30.00-Infinity display exclude include add");
-selectImage("C1-" + title);
-count=roiManager("count");
-positive_rois=0;
-used_rois=Array.getSequence(count);
+selectWindow("C2-"+title);
+run("Auto Threshold", "method=Percentile white");
+run("Divide...", "value=255");
+imageCalculator("Multiply create 32-bit", "C2-"+title,"C1-"+title);
+run("Directional Filtering", "type=Max operation=Opening line=30 direction=32");
+setOption("ScaleConversions", false);
+run("16-bit");
+run("Auto Threshold", "method=Default white");
+positive=getTitle();
+save(output+File.separator+positive+".tif");
+run("Set Measurements...", "area mean standard redirect=C1-"+title+" decimal=3");
+run("Analyze Particles...", "size=10-Infinity circularity=0.00-0.50 summarize");
+selectWindow("C3-"+title);
+run("Command From Macro", "command=[de.csbdresden.stardist.StarDist2D], args=['input':'C3-"+title+"', 'modelChoice':'Versatile (fluorescent nuclei)', 'normalizeInput':'true', 'percentileBottom':'1.0', 'percentileTop':'99.8', 'probThresh':'0.479071', 'nmsThresh':'0.3', 'outputType':'Label Image', 'nTiles':'1', 'excludeBoundary':'2', 'roiPosition':'Automatic', 'verbose':'false', 'showCsbdeepProgress':'false', 'showProbAndDist':'false'], process=[false]");
+run("Label Size Filtering", "operation=Greater_Than size=1500");
+run("Remove Border Labels", "left right top bottom");
+run("Remap Labels");
+run("Label Map to ROIs", "connectivity=C4 vertex_location=Corners name_pattern=r%03d");
+total_nuclei=roiManager("count");
+run("Set Measurements...", "mean integrated redirect="+positive+" decimal=3");
+roiManager("measure");
+positive_nuclei=0;
 for (i = 0; i < nResults(); i++) {
-    if (getResult('Solidity', i) > 0.97) {
-    	roiManager("select", i);
-    	if (getResult('Mean', i) > 3.5) {
-    		positive_rois++;
-    	}
-    } else {
-    	used_rois[i]=count+1;
+    v = getResult('RawIntDen', i);
+    if (v/255 > 200) {
+    	positive_nuclei++;
     }
 }
-used_rois=Array.deleteValue(used_rois, count+1);
-nuclei_measured=lengthOf(used_rois);
-roiManager("select",used_rois);
-roiManager("save selected", output+File.separator+noext[0]+"_measured_nuclei.zip");
-roiManager("delete");
-roiManager("deselect");
-if (roiManager("count") > 0) {
-	roiManager("save", output+File.separator+noext[0]+"_unmeasured_regions.zip");
-}
-
-print("Regions found: "+count);
-print("Nuclei measured: "+nuclei_measured);
-print("Positive nuclei: "+positive_rois);
-
+print(title);
+print("Total nuclei found: "+total_nuclei);
+print("Positive nuclei found: "+positive_nuclei);
+//waitForUser;
+close("*");
 selectWindow("Results");
 run("Close");
-selectWindow("ROI Manager");
-run("Close");
-close("*");
+roiManager("save", output+File.separator+title+"_nuclei.zip");
+roiManager("reset");
 }
