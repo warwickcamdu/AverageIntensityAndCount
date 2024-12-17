@@ -101,6 +101,8 @@ if ((positive_nuclei > 0) || (total_nuclei > 0)) {
 selectWindow("Results");
 run("Close");
 }
+if (total_nuclei>0) {
 roiManager("save", output+File.separator+subtitle[0]+"_nuclei.zip");
 roiManager("reset");
+}
 }
