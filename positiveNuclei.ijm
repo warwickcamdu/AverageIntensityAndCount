@@ -28,6 +28,7 @@ function processFile(input, output, file) {
 	// Leave the print statements until things work, then remove them.
 run("Bio-Formats Importer", "open=["+input+File.separator+file+"] color_mode=Default rois_import=[ROI manager] view=Hyperstack stack_order=XYCZT");
 title=getTitle();
+subtitle=split(title, ".");
 //Do 3D
 run("Split Channels");
 selectWindow("C2-"+title);
@@ -56,8 +57,7 @@ run("Z Project...", "projection=[Max Intensity]");
 setOption("ScaleConversions", false);
 run("16-bit");
 run("Auto Threshold", "method=Default white");
-positive=getTitle();
-save(output+File.separator+positive+".tif");
+save(output+File.separator+subtitle[0]+"_filtered_max.tif");
 run("Set Measurements...", "area mean standard redirect=C1-"+title+" decimal=3");
 run("Analyze Particles...", "size=10-Infinity circularity=0.00-0.50 show=Masks summarize");
 selectWindow("C3-"+title);
@@ -68,8 +68,8 @@ run("Remove Border Labels", "left right top bottom");
 run("Remap Labels");
 run("Label Map to ROIs", "connectivity=C4 vertex_location=Corners name_pattern=r%03d");
 total_nuclei=roiManager("count");
-selectWindow(positive);
-run("Set Measurements...", "mean integrated redirect="+positive+" decimal=3");
+selectWindow("MAX_filtered");
+run("Set Measurements...", "mean integrated redirect=MAX_filtered decimal=3");
 roiManager("measure");
 positive_nuclei=0;
 for (i = 0; i < nResults(); i++) {
@@ -84,6 +84,6 @@ print("Positive nuclei found: "+positive_nuclei);
 close("*");
 selectWindow("Results");
 run("Close");
-roiManager("save", output+File.separator+title+"_nuclei.zip");
+roiManager("save", output+File.separator+subtitle[0]+"_nuclei.zip");
 roiManager("reset");
 }
