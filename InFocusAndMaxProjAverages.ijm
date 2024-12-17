@@ -101,6 +101,7 @@ for (i = 1; i <= nSlices; i=i+2) {
 	Table.set("Sample", file_num, substring(meta[6],0,lengthOf(meta[6])-4));
 	Table.set("Ch"+i+" Mean", file_num, mean);
 	Table.set("Ch"+i+" StdDev", file_num, std);
+	//Add min and max values
 }
 if(endsWith(meta[5], "8")){
 	nuclei_channel=3;	

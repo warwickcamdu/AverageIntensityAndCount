@@ -31,20 +31,25 @@ title=getTitle();
 subtitle=split(title, ".");
 //Do 3D
 run("Split Channels");
+// Threshold actin in 3D
 selectWindow("C2-"+title);
 run("Auto Threshold", "method=Shanbhag white stack");
+//Converts 0-255 to 0-1
 for (i = 1; i <= nSlices; i++) {
     setSlice(i);
     run("Divide...", "value=255");
 }
+//Mask alphaactin with actin
 imageCalculator("Multiply create 32-bit stack", "C2-"+title,"C1-"+title);
 mult_result=getTitle();
-//Check if dectional beofre/after max proj: compare the results
+//Directional filter to keep long thin objects (remove noise)
 for (i = 1; i <= nSlices; i++) {
     setSlice(i);
+    //2D filter
     run("Directional Filtering", "type=Max operation=Opening line=30 direction=16");
     filt_result=getTitle();
     if (i>1){
+    	//Puts filtered images back into a stack
     	run("Concatenate...", "  title=filtered open image1=filtered image2=["+filt_result+"] image3=[-- None --]");
     } else {
     	rename("filtered");
@@ -53,16 +58,23 @@ for (i = 1; i <= nSlices; i++) {
 }
 
 selectWindow("filtered");
+//Max project to 2D
 run("Z Project...", "projection=[Max Intensity]");
 setOption("ScaleConversions", false);
 run("16-bit");
+//Threshold alphaactin
 run("Auto Threshold", "method=Default white");
 save(output+File.separator+subtitle[0]+"_filtered_max.tif");
 run("Set Measurements...", "area mean standard redirect=C1-"+title+" decimal=3");
+//Select non-circular areas larger than 10
+//Change for different resolution
 run("Analyze Particles...", "size=10-Infinity circularity=0.00-0.50 show=Masks summarize");
+//Segment nuclei
 selectWindow("C3-"+title);
 run("Z Project...", "projection=[Max Intensity]");
 run("Command From Macro", "command=[de.csbdresden.stardist.StarDist2D], args=['input':'MAX_C3-"+title+"', 'modelChoice':'Versatile (fluorescent nuclei)', 'normalizeInput':'true', 'percentileBottom':'1.0', 'percentileTop':'99.8', 'probThresh':'0.479071', 'nmsThresh':'0.3', 'outputType':'Label Image', 'nTiles':'1', 'excludeBoundary':'2', 'roiPosition':'Automatic', 'verbose':'false', 'showCsbdeepProgress':'false', 'showProbAndDist':'false'], process=[false]");
+//Filter nuclei by size and ignore on borders
+//Change for different resolution
 run("Label Size Filtering", "operation=Greater_Than size=1500");
 run("Remove Border Labels", "left right top bottom");
 run("Remap Labels");
@@ -71,6 +83,8 @@ total_nuclei=roiManager("count");
 selectWindow("MAX_filtered");
 run("Set Measurements...", "mean integrated redirect=MAX_filtered decimal=3");
 roiManager("measure");
+//Filter nuclei by alpha actin
+//Change for different resolution
 positive_nuclei=0;
 for (i = 0; i < nResults(); i++) {
     v = getResult('IntDen', i);
@@ -79,11 +93,14 @@ for (i = 0; i < nResults(); i++) {
     }
 }
 print(title);
+//save everything!
 print("Total nuclei found: "+total_nuclei);
 print("Positive nuclei found: "+positive_nuclei);
 close("*");
+if ((positive_nuclei > 0) || (total_nuclei > 0)) {
 selectWindow("Results");
 run("Close");
+}
 roiManager("save", output+File.separator+subtitle[0]+"_nuclei.zip");
 roiManager("reset");
 }
