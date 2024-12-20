@@ -19,8 +19,9 @@ function processFolder(input) {
 	list = getFileList(input);
 	list = Array.sort(list);
 	for (i = 0; i < list.length; i++) {
-		if(File.isDirectory(input + File.separator + list[i]))
-			processFolder(input + File.separator + list[i]);
+		if(File.isDirectory(input + File.separator + list[i])){
+			//processFolder(input + File.separator + list[i]);
+		}
 		if (endsWith(list[i], ".nd2")){
 		if (startsWith(list[i], "2024")){
 				meta=split(list[i], "_");
@@ -72,7 +73,7 @@ for (i = 1; i <= nSlices; i=i+2) {
 	run("Analyze Particles...", "display clear summarize composite");
 	selectWindow("Results");
 	run("Summarize");
-	wait(1000);
+	wait(5000);
 	max=Table.get("Max", nResults()-1);
 	min=Table.get("Min", nResults()-2);
 	mean=Table.get("Mean", nResults()-4);
