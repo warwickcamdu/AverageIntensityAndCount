@@ -12,5 +12,7 @@ This script takes .nd2 files with filenames of the form 2024MMDD_text_CellLine_t
 
 # References
 Schindelin, J., Arganda-Carreras, I., Frise, E., Kaynig, V., Longair, M., Pietzsch, T., … Cardona, A. (2012). Fiji: an open-source platform for biological-image analysis. Nature Methods, 9(7), 676–682. doi:10.1038/nmeth.2019
+
 David Legland, Ignacio Arganda-Carreras, Philippe Andrey, MorphoLibJ: integrated library and plugins for mathematical morphology with ImageJ, Bioinformatics, Volume 32, Issue 22, November 2016, Pages 3532–3534, https://doi.org/10.1093/bioinformatics/btw413
+
 Schmidt, U., Weigert, M., Broaddus, C., & Myers, G. (2018). Cell Detection with Star-Convex Polygons. In Lecture Notes in Computer Science (pp. 265–273). Springer International Publishing. doi:10.1007/978-3-030-00934-2_30
