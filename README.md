@@ -9,3 +9,6 @@ This script takes .nd2 files with filenames of the form 2024MMDD_text_CellLine_t
 
 ## positiveNuclei.ijm
 This script takes .nd2 files with filenames of the form 2024MMDD_text_CellLine_text_S8_y.nd2, where y is 1 to 5. It uses Stardist to find the nuclei and thresholds the alpha actin. It then states if the nuclei are positive for alpha actin if the nuclei region contains IntDen>2000 for the alpha actin channel. It output the ROIs and the counts and printed to the log.
+
+# References
+Schmidt, U., Weigert, M., Broaddus, C., & Myers, G. (2018). Cell Detection with Star-Convex Polygons. In Lecture Notes in Computer Science (pp. 265–273). Springer International Publishing. doi:10.1007/978-3-030-00934-2_30
